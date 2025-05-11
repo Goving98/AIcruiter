@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 main.py
 
+api/main.py
