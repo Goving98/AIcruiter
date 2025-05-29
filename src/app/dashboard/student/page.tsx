@@ -54,6 +54,11 @@ export default function StudentDashboard() {
       }, [router]);
 
     const handleCardClick = (interview: InterviewCard) => {
+      if (interview.status !== 'ACTIVE') {
+        toast.error('This interview is not active');
+        return;
+      }
+      // Navigate to the upload page for the selected interview
         router.push(`/interview/${interview.date.replace(/\s/g, '-')}/upload`);
     };
 
