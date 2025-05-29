@@ -33,6 +33,7 @@ const mockInterviews: InterviewCard[] = [
     timeSlot: '12pm till 8pm',
     status: 'UPCOMING',
   },
+  
 ];
 
 export default function StudentDashboard() {
@@ -68,7 +69,12 @@ export default function StudentDashboard() {
                 key={index}
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => handleCardClick(interview)}
+                onClick={() => {
+                  if (interview.status !== 'UPCOMING') {
+                    handleCardClick(interview);
+                  }
+                }}
+                disabled={interview.status === 'UPCOMING'}
                 className={`relative overflow-hidden rounded-xl p-6 transition-all duration-300 transform 
                   ${hoveredCard === index ? 'scale-105' : 'scale-100'}
                   ${interview.status === 'ACTIVE' 
