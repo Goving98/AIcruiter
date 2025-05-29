@@ -14,7 +14,6 @@ export default function CreateInterview() {
     date: '',
     timeStart: '',
     timeEnd: '',
-    location: '',
     description: '',
   });
 
@@ -25,9 +24,10 @@ export default function CreateInterview() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const requiredFields = ['title', 'role', 'technologies', 'date', 'timeSlot', 'location'];
+    const requiredFields = ['title', 'role', 'technologies', 'date', 'timeStart', 'timeEnd', 'description'];
     const hasEmpty = requiredFields.some((key) => !form[key as keyof typeof form]);
-
+    console.log('Form submitted:', form);
+    console.log('Has empty fields:', hasEmpty);
     if (hasEmpty) {
       toast.error('Please fill in all required fields');
       return;
@@ -124,8 +124,6 @@ export default function CreateInterview() {
               />
             </div>
           </div>
-
-
         </div>
 
         <div>

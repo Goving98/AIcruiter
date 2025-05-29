@@ -1,7 +1,6 @@
 'use client'
+import Image from 'next/image'
 import Link from 'next/link'
-import Image
- from 'next/image'
 export default function Home() {
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center text-white">
@@ -26,6 +25,14 @@ export default function Home() {
           <button className="bg-white text-indigo-700 px-8 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-indigo-100 transition">
             Register
           </button>
+        </Link>
+      </div>
+      {/* About Us Link Below */}
+      <div className="mt-4">
+        <Link href="/about">
+          <p className="text-amber-200  hover:text-orange-500 transition">
+            About us →
+          </p>
         </Link>
       </div>
     </div>
