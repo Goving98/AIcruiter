@@ -1,8 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 export default function UploadPage() {
   const params = useParams();
   const router = useRouter();
@@ -34,7 +33,7 @@ export default function UploadPage() {
         priority
       />
       
-      <div className="bg-primary-900/80 backdrop-blur-sm rounded-lg shadow-2xl p-8 max-w-4xl w-full mx-4">
+      <div className="bg-primary-900/80 backdrop-blur-sm rounded-lg shadow-2xl p-8 max-w-4xl w-full mx-4 animate-fade-in">
         <h1 className="text-3xl font-bold text-center mb-8">Interview Setup</h1>
         <div className="space-y-6">
           <div className="text-center">

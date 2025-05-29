@@ -74,7 +74,7 @@ export default function ResultsPage() {
 
   if (isLoading || !results) {
     return (
-      <div className="min-h-screen relative flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen relative flex flex-col items-center justify-center text-sky-200">
         <Image
           src="/images/cruiterbg.png"
           alt="Background"
@@ -88,7 +88,7 @@ export default function ResultsPage() {
 }
 
 return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center text-white">
+    <div className="min-h-screen relative flex flex-col items-center justify-center text-sky-200">
       {/* ───────── Background image ───────── */}
         <Image
             src="/images/cruiterbg.png"
@@ -99,7 +99,7 @@ return (
         />
 
         {/* ───────── Glassy card ───────── */}
-        <div className="bg-primary-900/80 backdrop-blur-sm rounded-lg shadow-2xl p-8 max-w-4xl w-full mx-4 space-y-8">
+        <div className="bg-primary-900/80 backdrop-blur-sm rounded-lg shadow-2xl p-8 max-w-4xl w-full mx-4 space-y-8 ">
             <h1 className="text-3xl font-bold text-center">
             Interview Results
             </h1>
@@ -121,7 +121,7 @@ return (
             </div>
 
             {/* Section breakdown */}
-            <div className="space-y-6">
+            <div className="space-y-6 animate-fade-in">
             {results.sections.map((section) => (
                 <div
                 key={section.title}
@@ -158,13 +158,13 @@ return (
             {/* Back / Next actions */}
             <div className="flex justify-center gap-4 pt-2">
             <button
-                onClick={() => router.push(`/interview/${interviewId}`)}
+                onClick={() => router.push(`/interview/${interviewId}/questions`)}
                 className="px-5 py-2 rounded bg-white/10 hover:bg-white/20 transition-all"
             >
                 View Questions
             </button>
             <button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/dashboard/student')}
                 className="px-5 py-2 rounded bg-accent-500 hover:bg-accent-400 transition-all"
             >
                 Finish

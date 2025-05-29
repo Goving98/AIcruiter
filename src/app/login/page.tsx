@@ -1,8 +1,9 @@
 'use client';
-import { useState , useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+
 type UserType = 'recruitee' | 'recruiter' | null;
 
 interface LoginCredentials {
@@ -19,47 +20,43 @@ export default function Login() {
   });
 
   useEffect(() => {
-    // Check if user just registered
     const registeredAs = localStorage.getItem('registeredAs');
     if (registeredAs) {
       setUserType(registeredAs as UserType);
-      // Clear it after setting
       localStorage.removeItem('registeredAs');
     }
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (credentials.email === 'test@test.com' && credentials.password === 'test123') {
-      // Store login status
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('userType', userType as string);
-      
+
       toast.success('Login successful!');
       router.push(userType === 'recruitee' ? '/dashboard/student' : '/dashboard/company');
     } else {
       toast.error('Invalid credentials. Please try again.');
     }
-  }; 
+  };
 
   if (!userType) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4">
-        <div className="bg-indigo-100 rounded-lg shadow-xl p-8 max-w-md w-full">
-          <h2 className="text-2xl font-bold text-indigo-800 mb-8 text-center">Choose Login Type</h2>
+      <div className="min-h-screen  flex items-center justify-center p-6 bg-cover bg-center relative"  style={{ backgroundImage: "url('/images/cruiterbg.png')" }}>
+        <div className="bg-blend-soft-light backdrop-blur-2xl rounded-xl shadow-2xl p-8 max-w-md w-full animate-fade-in">
+          <h2 className="text-3xl font-semibold text-center text-indigo-200 mb-6">Login as</h2>
           <div className="space-y-4">
             <button
               onClick={() => setUserType('recruitee')}
-              className="w-full bg-indigo-600 text-white py-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center space-x-2"
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-medium rounded-lg transition duration-200"
             >
-              <span className="text-lg font-medium">Login as Job Seeker</span>
+              Job Seeker
             </button>
             <button
               onClick={() => setUserType('recruiter')}
-              className="w-full bg-purple-600 text-white py-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white text-lg font-medium rounded-lg transition duration-200"
             >
-              <span className="text-lg font-medium">Login as Company</span>
+              Company
             </button>
           </div>
         </div>
@@ -68,55 +65,62 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center text-white">
-    <Image
-      src="/images/cruiterbg.png"
-      alt="Background"
-      fill
-      className="object-cover z-[-1] opacity-40" // Darkened background
-      priority
-    />
-    <div className="bg-primary-900/80 backdrop-blur-sm rounded-lg shadow-2xl p-8 max-w-md w-full border border-white/10">
-        <div className="flex items-center mb-6">
+    <div className="min-h-screen relative flex items-center justify-center px-4 py-10">
+      <Image
+        src="/images/cruiterbg.png"
+        alt="Background"
+        fill
+        className="object-cover z-[-1] opacity-40"
+        priority
+      />
+      <div className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl max-w-md w-full p-8 text-white animate-fade-in">
+        <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => setUserType(null)}
-            className="text-indigo-600 hover:text-indigo-800 transition-colors"
+            className="text-sm text-white/70 hover:text-white transition duration-150"
           >
             ← Back
           </button>
-          <h2 className="text-2xl font-bold text-white mb-8 text-center">
-            {userType ? `${userType === 'recruitee' ? 'Job Seeker' : 'Company'} Login` : 'Choose Login Type'}
+          <h2 className="text-2xl font-semibold text-sky-200 text-center w-full">
+            {userType === 'recruitee' ? 'Job Seeker Login' : 'Company Login'}
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-indigo-700 mb-2">Email</label>
+            <label className="block text-sm text-white/70 mb-1">Email</label>
             <input
               type="email"
               value={credentials.email}
-              onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-              className="w-full px-4 py-3 rounded-md bg-primary-800/50 border border-white/20 
-        focus:outline-none focus:ring-2 focus:ring-secondary-400 text-white placeholder-white/50"              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-indigo-700 mb-2">Password</label>
-            <input
-              type="password"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              className="w-full px-4 py-3 rounded-md bg-primary-800/50 border border-white/20 
-        focus:outline-none focus:ring-2 focus:ring-secondary-400 text-white placeholder-white/50"              required
+              onChange={(e) =>
+                setCredentials({ ...credentials, email: e.target.value })
+              }
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 text-white placeholder-white/50"
+              placeholder="Enter your email"
+              required
             />
           </div>
 
-          <button 
-        className="w-full bg-accent-500 text-white py-3 rounded-md hover:bg-accent-600 transition-colors shadow-lg"
-      >
-        Login
-      </button>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Password</label>
+            <input
+              type="password"
+              value={credentials.password}
+              onChange={(e) =>
+                setCredentials({ ...credentials, password: e.target.value })
+              }
+              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400 text-white placeholder-white/50"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 rounded-lg shadow-md text-white text-lg font-medium transition duration-200"
+          >
+            Login
+          </button>
         </form>
       </div>
     </div>
