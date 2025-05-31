@@ -46,3 +46,8 @@ src/utils/mongodb.ts
 src\utils\mongodb.ts
 
 utils/mongodb.ts
+
+.env
+.env.local
+.env.development
+.env.production
