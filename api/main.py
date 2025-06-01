@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-from pydantic import BaseModel
-from typing import List
-import together
-from fastapi.middleware.cors import CORSMiddleware
 import json
+from typing import List, Optional
+
+import together
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -21,7 +21,7 @@ app.add_middleware(
 # app = FastAPI()
 
 # API Key
-together.api_key = "tgp_v1_R4SVVmc_8XC1_NH-E-rJsMVsGksNgW9HcbOPQo7HpeI"
+together.api_key = os.getenv("TOGETHER_API_KEY", None)  # Set your Together API key here
 model_name = "mistralai/Mistral-7B-Instruct-v0.3"
 
 def extract_tech_qna(text):
@@ -49,17 +49,29 @@ def extract_behave_qna(text):
 
 # Request schema
 class InterviewRequest(BaseModel):
-    candidate_skills: str
-    job_description: str
-    project_details: str
+    candidate_skills : Optional[str] = None
+    job_description: Optional[str] = None
+    project_details: Optional[str] = None
+    interviewId: str
+    resume : str
 
 class MockInterviewRequest(BaseModel):
     candidate_skills: str
     tech_q: int
     tech_l: int
     tech_b: int
+    resume: Optional[str] = None
 
-# Helper: Call Together AP
+class EvaluationRequest(BaseModel):
+    tech_questions: List[str]
+    tech_answers: List[str]
+    tech_ideal_answers: List[str]
+    language_answers: List[str]
+    behavioral_questions: List[str]
+    behavioral_answers: List[str]
+
+
+# Helper: Call Together API
 
 def call_together(prompt: str, max_tokens: int = 3000):
     response = together.Complete.create(
@@ -165,13 +177,6 @@ You are an expert interviewer preparing **behavioral interview questions**, incl
 """
     return call_together(prompt)
   
-class EvaluationRequest(BaseModel):
-    tech_questions: List[str]
-    tech_answers: List[str]
-    tech_ideal_answers: List[str]
-    language_answers: List[str]
-    behavioral_questions: List[str]
-    behavioral_answers: List[str]
 
 def tech_eval(question, answer, ideal_answer):
     model_name = "mistralai/Mistral-7B-Instruct-v0.3"

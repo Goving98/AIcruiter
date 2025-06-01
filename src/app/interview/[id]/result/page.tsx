@@ -25,12 +25,7 @@ export default function ResultsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<InterviewResults | null>(null);
 
-  /* ─────────────────────────────────────────────────────────
-     In production you’d fetch real results here.
-     For now we just hydrate dummy data once on mount.
-  ───────────────────────────────────────────────────────────*/
   useEffect(() => {
-    // simulate network delay
     setIsLoading(true);
     const timer = setTimeout(() => {
       setResults({

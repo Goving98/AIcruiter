@@ -18,7 +18,7 @@ interface SavedMessage {
 
 type ScriptEntry =
   | { type: 'intro' | 'closing'; text: string }
-  | { type: 'question'; text: string; id: string; userAnswer?: string };
+  | { type: 'question'; text: string; id: string; userAnswer?: string; ideal_answer?: string };
 
 enum CallStatus {
   INACTIVE = 'INACTIVE',
@@ -146,11 +146,15 @@ export default function QuestionsPage() {
   const submitForEvaluation = async () => {
     const answersPayload = scriptRef.current
       .filter((s): s is Extract<ScriptEntry, { type: 'question' }> => s.type === 'question')
-      .map(({ id, text, userAnswer }) => ({
-        id,
-        question: text,
-        answer: userAnswer ?? '',
-      }));
+      .reduce((acc, { id, text, userAnswer, ideal_answer }) => {
+        acc[id] = {
+          question: text,
+          answer: userAnswer ?? '',
+          ideal_answer: ideal_answer || '',
+        };
+        return acc;
+      }, {} as Record<string, { question: string; answer: string; ideal_answer: string }>);
+
 
     try {
       console.log('Submitting evaluation for interview:', interviewId);
@@ -268,14 +272,20 @@ export default function QuestionsPage() {
     handleStart(); // Enter fullscreen mode when starting the interview
     setIsLoading(true);
     try {
+      console.log('Fetching interview questions for ID:', interviewId);
+      console.log('Resume text:', localStorage.getItem('resumeText'));
+      // Simulate interview data
+
       const interviewData = {
+        resume : localStorage.getItem('resumeText') || '',
+        interview_id: interviewId,
+        interview_type: 'real', // or 'mock'
         candidate_skills: 'Python, Machine learning',
         job_description: 'Software Developer position requiring strong programming skills',
         project_details: 'Built various full-stack applications',
       };
       toast.success('Generating interview questions...');
       const data = await generateInterview(interviewData);
-
       setQuestions(data);
       buildScript(data); // create full script here
     } catch (err) {

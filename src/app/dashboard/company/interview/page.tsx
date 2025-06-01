@@ -15,6 +15,7 @@ export default function CreateInterview() {
     timeStart: '',
     timeEnd: '',
     description: '',
+    candidateEmails: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -124,6 +125,40 @@ export default function CreateInterview() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Email List */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700">Candidate Emails (comma-separated)</label>
+          <input
+            type="text"
+            name="candidateEmails"
+            placeholder="e.g. user1@example.com, user2@example.com"
+            value={form.candidateEmails}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          />
+          {/* Preview top 5 emails */}
+          {form.candidateEmails && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {form.candidateEmails
+                .split(',')
+                .map(email => email.trim())
+                .filter(email => email.length > 0)
+                .slice(0, 5)
+                .map((email, i) => (
+                  <span
+                    key={i}
+                    className="bg-indigo-100 text-indigo-700 text-sm px-2 py-1 rounded-full"
+                  >
+                    {email}
+                  </span>
+                ))}
+              {form.candidateEmails.split(',').length > 5 && (
+                <span className="text-sm text-gray-500">+ more</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
