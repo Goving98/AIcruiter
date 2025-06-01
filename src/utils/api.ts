@@ -56,20 +56,20 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const evaluateInterview = async (body: {
   interviewId: string;
-  responses: {
-    questionId: string;
-    question: string;
-    ideal_answer: string;
-    userAnswer?: string;
-  }[];
+  responses: Record<string, {    question: string;
+    answer: string; ideal_answer: string;}>;
 }) => {
   try {
-    const res = await fetch('/api/evaluateInterview', {
+    const payload = {
+      questions : body.responses
+    }
+    console.log('Payload for evaluation:', payload);
+    const res = await fetch('http://localhost:8000/evaluate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -77,6 +77,7 @@ export const evaluateInterview = async (body: {
     }
 
     const result = await res.json();
+    console.log('Evaluation Result:', result);
     return result;
   } catch (err) {
     console.error('Error in evaluateInterview:', err);

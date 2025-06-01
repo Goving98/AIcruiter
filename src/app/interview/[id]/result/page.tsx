@@ -24,9 +24,14 @@ export default function ResultsPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<InterviewResults | null>(null);
-
+  
   useEffect(() => {
     setIsLoading(true);
+    const resultsData = localStorage.getItem('evaluationResult');
+    setResults(resultsData ? JSON.parse(resultsData) : null);
+    console.log('Results:', resultsData);
+    setIsLoading(false);
+    /*
     const timer = setTimeout(() => {
       setResults({
         id:1,
@@ -67,6 +72,7 @@ export default function ResultsPage() {
       setIsLoading(false);
     }, 800); // 0.8 s
     return () => clearTimeout(timer);
+    */
   }, []);
 
   if (isLoading || !results) {

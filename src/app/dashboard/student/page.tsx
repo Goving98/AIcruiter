@@ -40,6 +40,7 @@ export default function StudentDashboard() {
         });
         if (!res.ok) throw new Error('Failed to fetch interviews');
         const data = await res.json();
+        localStorage.setItem('interviews', JSON.stringify(data));
 
         const now = new Date();
         const mapped = data.map((interview: any) => {
@@ -76,7 +77,7 @@ export default function StudentDashboard() {
       toast.error('This interview is not active');
       return;
     }
-    router.push(`/interview/${interview.date.replace(/\s/g, '-')}/upload`);
+    router.push(`/interview/${interview.id.replace(/\s/g, '-')}/upload`);
   };
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { generateInterview } from '@/utils/api';
+import { evaluateInterview, generateInterview } from '@/utils/api';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -50,6 +50,22 @@ export default function QuestionsPage() {
   const recognitionRef = useRef<any>(null);
 
   /* ===== helpers ===== */
+  const getDescription = () => {
+    const stored = localStorage.getItem('interviews');
+    if (stored) {
+      const interviews = JSON.parse(stored); // Array of interview objects
+      const interview = interviews.find((i: any) => i.id === interviewId);
+
+      if (interview) {
+        const description = interview.description;
+        console.log('Description:', description);
+        return description || 'No description available for this interview.';
+      } else {
+        console.warn('Interview not found for id:', interviewId);
+        return 'Interview not found.';
+      }
+    }
+  }
 
   /** Speak a line with WebSpeech synthesis. */
   const speak = (text: string): Promise<void> =>
@@ -129,7 +145,7 @@ export default function QuestionsPage() {
   /** Build script once questions arrive. */
   const buildScript = (qResp: QuestionsResponse) => {
     const qScript: ScriptEntry[] = Object.entries(qResp.questions).map(
-      ([id, qa]) => ({ type: 'question', id, text: qa.question })
+      ([id, qa]) => ({ type: 'question', id, text: qa.question, ideal_answer: qa.ideal_answer || '' })
     );
     console.log('Generated script:', qScript);
 
@@ -150,21 +166,20 @@ export default function QuestionsPage() {
         acc[id] = {
           question: text,
           answer: userAnswer ?? '',
-          ideal_answer: ideal_answer || '',
+          ideal_answer: ideal_answer ?? '',
         };
         return acc;
       }, {} as Record<string, { question: string; answer: string; ideal_answer: string }>);
 
 
     try {
-      console.log('Submitting evaluation for interview:', interviewId);
       console.log('Answers payload:', answersPayload);
-      /*
-      await evaluateInterview({
-        interview_id: interviewId,
+      
+      const eval_result = await evaluateInterview({
+        interviewId: interviewId,
         responses: answersPayload,
       });
-      */
+      localStorage.setItem('evaluationResult', JSON.stringify(eval_result));
       console.log('Evaluation submitted.');
     } catch (err) {
       console.error('Error submitting evaluation:', err);
@@ -272,16 +287,14 @@ export default function QuestionsPage() {
     handleStart(); // Enter fullscreen mode when starting the interview
     setIsLoading(true);
     try {
-      console.log('Fetching interview questions for ID:', interviewId);
-      console.log('Resume text:', localStorage.getItem('resumeText'));
-      // Simulate interview data
-
+      // interview data
+      const interview_description = getDescription();
       const interviewData = {
         resume : localStorage.getItem('resumeText') || '',
         interview_id: interviewId,
         interview_type: 'real', // or 'mock'
         candidate_skills: 'Python, Machine learning',
-        job_description: 'Software Developer position requiring strong programming skills',
+        job_description: interview_description || 'Software Engineer at XYZ Corp',
         project_details: 'Built various full-stack applications',
       };
       toast.success('Generating interview questions...');
@@ -289,7 +302,7 @@ export default function QuestionsPage() {
       setQuestions(data);
       buildScript(data); // create full script here
     } catch (err) {
-      toast.error('Failed to fetch interview questions. Please try again.');
+      //toast.error('Failed to fetch interview questions. Please try again.');
       console.error('Error fetching interview questions:', err);
     } finally {
       setIsLoading(false);

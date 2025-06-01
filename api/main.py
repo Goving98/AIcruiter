@@ -328,7 +328,9 @@ You are an expert interviewer preparing a customized interview based on a given 
 async def evaluate(
     data: dict = Body(...)
 ):
+    print("Received data:", data)
     questions = data.get("questions", {})
+    print("questions", questions)
     tech_scores = []
     lang_scores = []
     behave_scores = []
