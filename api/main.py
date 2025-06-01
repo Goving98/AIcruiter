@@ -1,10 +1,14 @@
 import json
+import os
+import re
 from typing import List, Optional
 
 import together
-from fastapi import FastAPI, Request
+from fastapi import Body, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+# from dotenv import load_dotenv
 
 app = FastAPI()
 
@@ -45,6 +49,18 @@ def extract_behave_qna(text):
         return text[start+1:end+1]  # exclude first '{', include last '}'
     return ""
 
+def parse_score_feedback(text):
+    # Find all scores and feedbacks in the text
+    scores = [int(s) for s in re.findall(r"Score:\s*(\d+)", text)]
+    feedbacks = re.findall(r"Feedback:\s*(.*)", text)
+    # Use the last found score/feedback if multiple, else None/""
+    score = scores[-1] if scores else None
+    feedback = feedbacks[-1] if feedbacks else ""
+    return {
+        "score": score,
+        "feedback": feedback
+    }
+
 
 
 # Request schema
@@ -56,10 +72,8 @@ class InterviewRequest(BaseModel):
     resume : str
 
 class MockInterviewRequest(BaseModel):
-    candidate_skills: str
-    tech_q: int
-    tech_l: int
-    tech_b: int
+    resume: str
+    job_description: str
     resume: Optional[str] = None
 
 class EvaluationRequest(BaseModel):
@@ -85,15 +99,15 @@ def call_together(prompt: str, max_tokens: int = 3000):
     return response["choices"][0]["text"]
 
 # Function: Technical
-def tech(job_description: str, candidate_skills: str):
+def tech(job_description: str, resume: str):
     prompt = f"""
-You are an expert interviewer preparing a customized interview based on a given **job description** and the **candidate's skill set**. Your goal is to generate **10 interview questions** along with **ideal answers** that match the job role.
+You are an expert interviewer preparing a customized interview based on a given **job description** and the **candidate's skill set** that you can extract from the **resume**. Your goal is to generate **10 interview questions** along with **ideal answers** that match the job role.
 
 ### **Job Description:**
 {job_description}
 
-### **Candidate's Skill Set:**
-{candidate_skills}
+### **Candidate's Resume:**
+{resume}
 
 ### **Instructions:**
 - Generate **10 technical** relevant to the job description.
@@ -116,16 +130,16 @@ You are an expert interviewer preparing a customized interview based on a given 
     return call_together(prompt, max_tokens=6000)
 
 # Function: Language
-def lang(candidate_skills: str):
+def lang(resume: str):
     prompt = f"""
 You are an experienced interviewer assessing a candidate's **English language proficiency**.
 
-### **Candidate's Skill Set:**
-{candidate_skills}
+### **Candidate's Resume**
+{resume}
 
 ### **Instructions:**
 - Generate **5 interview questions** specifically to test the candidate’s **English language fluency, grammar, vocabulary, articulation, comprehension, and clarity of thought**.
-- Provide **ideal answers** that reflect strong communication skills based on the candidate's technical background.
+- Provide **ideal answers** that reflect strong communication skills based on the candidate's technical background and resume.
 - Return the output in **valid JSON format** with this structure:
 - start from q11
 
@@ -144,20 +158,18 @@ You are an experienced interviewer assessing a candidate's **English language pr
     return call_together(prompt)
 
 # Function: Behavioral
-def behave(candidate_skills: str, project_details: str):
+def behave(resume: str):
     prompt = f"""
 You are an expert interviewer preparing **behavioral interview questions**, including project-specific ones, based on the candidate's skills and project experience.
 
-### **Candidate's Skill Set:**
-{candidate_skills}
+### **Candidate's Resume**
+{resume}
 
-### **Project Experience:**
-{project_details}
 
 ### **Instructions:**
 - Generate **5 behavioral interview questions**:
   - 3 general behavioral questions
-  - 2 questions specifically based on the provided project experience
+  - 2 questions specifically based on the provided project experience extracted from the resume.
 - Questions should explore the candidate's problem-solving, ownership, teamwork, decision-making, and conflict resolution skills.
 - Provide ideal answers demonstrating thoughtfulness, leadership, and technical depth.
 - start from q16
@@ -201,6 +213,7 @@ Ideal Answer:
 
 Candidate Answer:
 "{answer}"
+
 """
     response = together.Complete.create(
         prompt=prompt,
@@ -228,6 +241,7 @@ Candidate Response:
 Format:
 Score: <score>
 Feedback: <short feedback>
+
 """
     response = together.Complete.create(
         prompt=prompt,
@@ -269,21 +283,35 @@ Feedback: <feedback>
     )
     return response["choices"][0]["text"]
 
+
+#Function: Feedback
+def feedback(feedback_text: str):
+    prompt = f"""You are a feedback evaluator for interview responses.
+Your task is to analyze the feedback text and provide a overall feedback based on all the individual feedbacks for all the questions based on {feedback_text}.
+- make the summary feedback in 2-3 lines 
+- just sumamrize the feedbacks and do not repeat the individual feedbacks or any scores.
+- do not mention any individual question or answer in the feedback i just need some text that summarizes the overall performance of the candidate.
+Format:
+Overall Feedback: <summary>
+
+- Overall Feedback should be concise and actionable, focusing on key strengths and areas for improvement and only given once.
+"""
+    return call_together(prompt, max_tokens=6000)
 # Function: Mock
-def mock(candidate_skills: str, tech_q: int, tech_l: int, tech_b: int):
+def mock(resume: str,job_description: str):
     prompt = f"""
-You are an expert interviewer preparing a customized interview based on a given the **candidate's skill set**. Your goal is to generate **interview questions** along with **ideal answers** that match the job role having {tech_q} technical questions, {tech_l} language proficiency questions, and {tech_b} behavioral questions.
+You are an expert interviewer preparing a customized interview based on a given the **candidate's skill set** and **porjects** from the **resume** provided. Your goal is to generate **interview questions** along with **ideal answers** that match the job role having 10 technical questions, 5 language proficiency questions, and 5 behavioral questions.
 
 
-### **Candidate's Skill Set :**
-{candidate_skills}
+### **Candidate's resume :**
+{resume}
 
 ### **Instructions:**
 - Generate **technical, language and behavioral questions** relevant to the candidate skills.
 - Provide **ideal answers** that showcase expertise based on the candidate's skill set.
 - Ensure questions vary in difficulty and depth.
 - Return the output in **valid JSON format** with this structure:
-- Return {tech_q} technical questions, {tech_l} language proficiency questions, and {tech_b} behavioral questions a total of {tech_q + tech_l + tech_b} questions.
+- Return 10 technical questions, 5 language proficiency questions, and 5 behavioral questions a total of 20 questions.
 {{
   "q1": {{
     "question": "Your technical question here",
@@ -292,61 +320,76 @@ You are an expert interviewer preparing a customized interview based on a given 
   ...
 }}
 """
-    return call_together(prompt, max_tokens=6000)
+    return call_together(prompt, max_tokens=10000)
 
 
 
 @app.post("/evaluate")
-async def evaluate(data: EvaluationRequest):
+async def evaluate(
+    data: dict = Body(...)
+):
+    questions = data.get("questions", {})
     tech_scores = []
-    for q, a, ideal in zip(data.tech_questions, data.tech_answers, data.tech_ideal_answers):
-        result = tech_eval(q, a, ideal)
-        tech_scores.append(result)
-
     lang_scores = []
-    for a in data.language_answers:
-        result = lang_eval(a)
-        lang_scores.append(result)
-
     behave_scores = []
-    for q, a in zip(data.behavioral_questions, data.behavioral_answers):
-        result = behave_eval(q, a)
-        behave_scores.append(result)
 
-    # Extract numeric scores from each response (basic string parsing)
-    def extract_score(text):
-        for line in text.splitlines():
-            if "Score" in line:
-                try:
-                    return int(''.join([c for c in line if c.isdigit()]))
-                except:
-                    return 0
-        return 0
+    # First 10: tech, next 5: lang, last 5: behave
+    sorted_qids = sorted(questions.keys(), key=lambda x: int(x[1:]))  # sort by q number
+    for idx, qid in enumerate(sorted_qids):
+        qdata = questions[qid]
+        question = qdata.get("question", "")
+        candidate_answer = qdata.get("candidate_answer", "")
+        ideal_answer = qdata.get("ideal_answer", "")
+
+        if idx < 10:
+            result = tech_eval(question, candidate_answer, ideal_answer)
+            tech_scores.append(parse_score_feedback(result))
+        elif idx < 15:
+            result = lang_eval(candidate_answer)
+            lang_scores.append(parse_score_feedback(result))
+        else:
+            result = behave_eval(question, candidate_answer)
+            behave_scores.append(parse_score_feedback(result))
+
+    def extract_score(obj):
+        return obj.get("score", 0) if isinstance(obj, dict) else 0
+    def extract_overall_feedback(text: str) -> str:
+        if "Overall Feedback:" in text:
+            return text.split("Overall Feedback:", 1)[1].strip()
+        return ""
 
     tech_avg = sum(extract_score(s) for s in tech_scores) / len(tech_scores) if tech_scores else 0
     lang_avg = sum(extract_score(s) for s in lang_scores) / len(lang_scores) if lang_scores else 0
     behave_avg = sum(extract_score(s) for s in behave_scores) / len(behave_scores) if behave_scores else 0
-    final_avg = round(((tech_avg*10) + (lang_avg*5) + (behave_avg*5)) / 20, 2)
+    final_avg = round(((tech_avg * 10) + (lang_avg * 5) + (behave_avg * 5)) / 20, 2)
+
+    technical_feedback = feedback("technical feedback")
+    language_feedback = feedback("language feedback")
+    behavioral_feedback = feedback("behavioral feedback")
+
+    tech_overall_feedback = extract_overall_feedback(technical_feedback).replace('\n', ' ').strip()
+    lang_overall_feedback = extract_overall_feedback(language_feedback).replace('\n', ' ').strip()
+    behave_overall_feedback = extract_overall_feedback(behavioral_feedback).replace('\n', ' ').strip()
 
     return {
+        "final_score": final_avg,
         "technical_scores": tech_scores,
+        "technical": tech_avg,
+        "technical_feedback": tech_overall_feedback,
         "language_scores": lang_scores,
+        "language": lang_avg,
+        "language_feedback": lang_overall_feedback,
         "behavioral_scores": behave_scores,
-        "average_scores": {
-            "technical": tech_avg,
-            "language": lang_avg,
-            "behavioral": behave_avg,
-            "final_score": final_avg
-        }
+        "behavioral": behave_avg,
+        "behavioral_feedback": behave_overall_feedback,
     }
-
 
 # POST endpoint
 @app.post("/generate-interview/")
 async def generate_interview(data: InterviewRequest):
-    tech_qna = tech(data.job_description, data.candidate_skills)
-    lang_qna = lang(data.candidate_skills)
-    behave_qna = behave(data.candidate_skills, data.project_details)
+    tech_qna = tech(data.job_description, data.resume)
+    lang_qna = lang(data.resume)
+    behave_qna = behave(data.resume)
 
     
     tech_part = extract_tech_qna(tech_qna)
@@ -364,7 +407,7 @@ async def generate_interview(data: InterviewRequest):
 @app.post("/mock-interview/")
 async def mock_interview(data: MockInterviewRequest):
     
-    qna = mock(data.candidate_skills,data.tech_q,data.tech_l,data.tech_b)
+    qna = mock(data.resume,data.job_description)
     qna= extract_tech_qna(qna)
     combined_json_str = "{" + qna.strip("{}") + "}"
     questions_dict = json.loads(combined_json_str)
