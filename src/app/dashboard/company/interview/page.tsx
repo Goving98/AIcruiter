@@ -27,18 +27,43 @@ export default function CreateInterview() {
 
     const requiredFields = ['title', 'role', 'technologies', 'date', 'timeStart', 'timeEnd', 'description'];
     const hasEmpty = requiredFields.some((key) => !form[key as keyof typeof form]);
-    console.log('Form submitted:', form);
-    console.log('Has empty fields:', hasEmpty);
     if (hasEmpty) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
-      // Simulate submission or send to API
-      console.log('Submitting interview:', form);
+      // Get company email from localStorage
+      const userDataStr = localStorage.getItem('userData');
+      let companyEmail = '';
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          companyEmail = userData.email || '';
+        } catch {}
+      }
+
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('/api/interview/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          ...form,
+          companyEmail,
+          candidateEmails: form.candidateEmails
+            .split(',')
+            .map(email => email.trim())
+            .filter(email => email.length > 0),
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to create interview');
       toast.success('Interview created successfully!');
-      router.push('/dashboard/company'); // Change path as needed
+      router.push('/dashboard/company');
     } catch (err) {
       toast.error('Failed to create interview');
     }

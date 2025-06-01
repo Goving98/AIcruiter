@@ -18,6 +18,7 @@ export default function Layout({ children }: LayoutProps) {
     setUserType(localStorage.getItem('userType'));
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userType = localStorage.getItem('userType');
+    setUserType(userType)
     if (!isLoggedIn) {
         toast.error('Please login to access this page');
         router.push('/login');
