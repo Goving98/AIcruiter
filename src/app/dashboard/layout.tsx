@@ -60,12 +60,12 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   Results
                 </button>
-                <button
+                {/* <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
                   onClick={() => router.push('/dashboard/student/profile')}
                 >
                   Profile
-                </button>
+                </button> */}
                 
               </>
             ) : userType === 'recruiter' ? (
@@ -88,12 +88,12 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   Results
                 </button>
-                <button
+                {/* <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
                   onClick={() => router.push('/dashboard/company/profile')}
                 >
                   Profile
-                </button>
+                </button> */}
               </>
             ) : null}
           </div>

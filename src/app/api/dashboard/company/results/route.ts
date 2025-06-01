@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
 
     const { db } = await connectToDatabase();
     const interviews = await db.collection('interview_details').find({ companyEmail: email }).toArray();
-
     return NextResponse.json(interviews);
   } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

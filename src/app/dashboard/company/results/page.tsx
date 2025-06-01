@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface ResultCard {
-  id: number;
+  id: string;
+  title: string;
   date: string;
   company: string;
   role: string;
@@ -13,7 +14,7 @@ interface ResultCard {
 
 export default function StudentResults() {
   const router = useRouter();
-  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const [results, setResults] = useState<ResultCard[]>([]);
 
   useEffect(() => {
@@ -30,26 +31,29 @@ export default function StudentResults() {
 
     // Fetch results from API (GET)
     const fetchResults = async () => {
-      try {
-        const res = await fetch('/api/dashboard/company/results', {
-          method: 'GET',
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        });
-        if (!res.ok) throw new Error('Failed to fetch results');
-        const data = await res.json();
-        setResults(data);
-        console.log('Fetched results:', data);
-      } catch (err) {
-        toast.error('Failed to fetch results');
-      }
-    };
-
-    fetchResults();
-  }, [router]);
+    try {
+      const res = await fetch('/api/dashboard/company/results', {
+        method: 'GET',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!res.ok) throw new Error('Failed to fetch results');
+      const data = await res.json();
+      setResults(data.map((item: any) => ({
+        ...item,
+        id: item.id || item._id?.toString() || '', // ensure id is present and string
+      })));
+      console.log('Fetched results:', data);
+    } catch (err) {
+      toast.error('Failed to fetch results');
+    }
+  };
+  fetchResults();
+}, [router]);
 
   const handleRowClick = (result: ResultCard) => {
+    localStorage.setItem('selectedInterviewId', result.id);
     router.push(`/dashboard/company/results/${result.id}`);
   };
 
@@ -71,7 +75,7 @@ export default function StudentResults() {
             onClick={() => handleRowClick(result)}
           >
             <div>
-              <div className="text-lg font-semibold group-hover:text-white">{result.company}</div>
+              <div className="text-lg font-semibold group-hover:text-white">{result.title}</div>
               <div className="text-sm text-gray-600 group-hover:text-white">{result.role}</div>
               <div className="text-xs text-gray-400 mt-1 group-hover:text-white">Date: {result.date}</div>
             </div>
