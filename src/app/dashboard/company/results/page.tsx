@@ -11,24 +11,42 @@ interface ResultCard {
   createdAt?: string; // Optional field for created date
 }
 
-const mockResults: ResultCard[] = [
-  { id:1,date: 'Sep 6', company: 'Some Name 1', role: 'Software Developer', createdAt: '2023-09-06T12:00:00Z' },
-  { id:2,date: 'Sep 18', company: 'Some Name 1', role: 'Software Developer', createdAt: '2023-09-18T12:00:00Z' },
-  { id:3,date: 'Sep 20', company: 'Some Name 1', role: 'Software Developer', createdAt:'2023-09-22T12:00:00Z'},
-];
-
 export default function StudentResults() {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [results, setResults] = useState<ResultCard[]>([]);
 
   useEffect(() => {
-    // Check if user is logged in and is a student
+    // Check if user is logged in and is a recruiter
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userType = localStorage.getItem('userType');
     if (!isLoggedIn || userType !== 'recruiter') {
       toast.error('Please login to access this page');
       router.push('/login');
+      return;
     }
+
+    // Fetch results from API
+    const fetchResults = async () => {
+  try {
+    const res = await fetch('/api/dashboard/company/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userType,
+        email: localStorage.getItem('email'), // send email explicitly
+        // ...other data
+      }),
+    });
+    if (!res.ok) throw new Error('Failed to fetch results');
+    const data = await res.json();
+    setResults(data);
+  } catch (err) {
+    toast.error('Failed to fetch results');
+  }
+};
+
+    fetchResults();
   }, [router]);
 
   const handleRowClick = (result: ResultCard) => {
@@ -36,7 +54,7 @@ export default function StudentResults() {
   };
 
   // Sort results by createdAt descending (most recent first)
-  const sortedResults = [...mockResults].sort((a, b) => {
+  const sortedResults = [...results].sort((a, b) => {
     if (!a.createdAt || !b.createdAt) return 0;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
