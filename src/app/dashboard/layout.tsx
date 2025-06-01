@@ -15,6 +15,7 @@ export default function Layout({ children }: LayoutProps) {
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
+    setUserType(localStorage.getItem('userType'));
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     const userType = localStorage.getItem('userType');
     setUserType(userType)
@@ -44,10 +45,64 @@ export default function Layout({ children }: LayoutProps) {
           </div>
 
           {/* Center Nav Links */}
+<<<<<<< Updated upstream
           <div className="hidden md:flex space-x-8">
             <button className="font-medium text-gray-600 hover:text-indigo-600">Schedule</button>
             <button className="font-medium text-gray-600 hover:text-indigo-600">Applications</button>
             <button className="font-medium text-gray-600 hover:text-indigo-600">Results</button>
+=======
+           <div className="hidden md:flex space-x-8">
+            {userType === 'recruitee' ? (
+              <>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/student')}
+                >
+                  Schedule
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/student/results')}
+                >
+                  Results
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/student/profile')}
+                >
+                  Profile
+                </button>
+                
+              </>
+            ) : userType === 'recruiter' ? (
+              <>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/company')}
+                >
+                  Home
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/company/interviews')}
+                >
+                  Interviews
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/company/results')}
+                >
+                  Results
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/company/profile')}
+                >
+                  Profile
+                </button>
+              </>
+            ) : null}
+>>>>>>> Stashed changes
           </div>
 
           {/* Right side: Logout */}

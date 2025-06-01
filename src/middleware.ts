@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from './utils/jwt';
 
 export function middleware(request: NextRequest) {
     // Exclude auth routes from middleware
-    const publicPaths = ['/api/auth/login', '/api/auth/register'];
+    const publicPaths = ['/api/auth/login', '/api/auth/register', '/api/extractpdf'];
     if (publicPaths.includes(request.nextUrl.pathname)) {
         return NextResponse.next();
     }
