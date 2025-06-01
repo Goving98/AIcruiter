@@ -31,6 +31,7 @@ enum CallStatus {
 export default function QuestionsPage() {
   const router = useRouter();
   const { id: interviewId } = useParams() as { id: string };
+  const [started, setStarted] = useState(false);
 
   /* ----- ui / flow state ----- */
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -219,9 +220,52 @@ export default function QuestionsPage() {
     initRecognition();
   }, []);
 
+  const enterFullscreen = () => {
+    const el = document.documentElement;
+    console.log('Entering fullscreen mode... by push', el);
+
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if ((el as any).webkitRequestFullscreen) (el as any).webkitRequestFullscreen();
+    else if ((el as any).msRequestFullscreen) (el as any).msRequestFullscreen();
+  };
+  const handleStart = () => {
+    enterFullscreen();
+    setStarted(true);
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (
+        !document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.mozFullScreenElement &&
+        !document.msFullscreenElement
+      ) {
+        // User exited fullscreen
+        toast.error('You cannot exit fullscreen during the interview.');
+        enterFullscreen(); // Force back to fullscreen
+      }
+    };
+
+    if (started) {
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [started]);
+
   /* Fetch questions once resume is uploaded & page loads */
   useEffect(() => {
     const fetchQuestions = async () => {
+      handleStart() // Enter fullscreen mode when starting the interview
       setIsLoading(true);
       try {
         const userSkills = localStorage.getItem('userSkills') || '';
@@ -232,8 +276,9 @@ export default function QuestionsPage() {
         };
         toast.success('Generating interview questions...');
         const data = await generateInterview(interviewData);
+
         setQuestions(data);
-        buildScript(data); // ★ create full script here
+        buildScript(data); // create full script here
       } catch (err) {
         // Fallback data in case of API error
         const data = {
@@ -290,10 +335,12 @@ export default function QuestionsPage() {
     );
   }
 
+  
+
   const currentScriptEntry = scriptRef.current[idx.current];
   const questionNumber = currentScriptEntry?.type === 'question' ? currentScriptEntry.id : '';
   const questionText = currentScriptEntry?.type === 'question' ? currentScriptEntry.text : '';
-
+  
 
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center text-white">

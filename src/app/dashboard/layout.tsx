@@ -44,57 +44,10 @@ export default function Layout({ children }: LayoutProps) {
           </div>
 
           {/* Center Nav Links */}
-           <div className="hidden md:flex space-x-8">
-            {userType === 'recruitee' ? (
-              <>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/student')}
-                >
-                  Schedule
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/student/results')}
-                >
-                  Results
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/student/profile')}
-                >
-                  Profile
-                </button>
-                
-              </>
-            ) : userType === 'recruiter' ? (
-              <>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company')}
-                >
-                  Home
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company/interviews')}
-                >
-                  Interviews
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company/results')}
-                >
-                  Results
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company/profile')}
-                >
-                  Profile
-                </button>
-              </>
-            ) : null}
+          <div className="hidden md:flex space-x-8">
+            <button className="font-medium text-gray-600 hover:text-indigo-600">Schedule</button>
+            <button className="font-medium text-gray-600 hover:text-indigo-600">Applications</button>
+            <button className="font-medium text-gray-600 hover:text-indigo-600">Results</button>
           </div>
 
           {/* Right side: Logout */}
