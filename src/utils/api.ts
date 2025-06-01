@@ -56,12 +56,55 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const evaluateInterview = async (body: {
   interviewId: string;
-  responses: Record<string, {    question: string;
+  responses: Record<string, {question: string;
     answer: string; ideal_answer: string;}>;
 }) => {
   try {
     const payload = {
+      interviewId: body.interviewId,
       questions : body.responses
+    }
+    console.log('Payload for evaluation:', payload);
+    const res = await fetch('http://localhost:8000/mock-evaluate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Server responded with ${res.status}: ${errorText}`);
+    }
+    const result = await res.json();
+    localStorage.setItem('evaluationResult', JSON.stringify(result));
+    console.log('Evaluation Result:', result);
+    return result;
+  } catch (err) {
+    console.error('Error in evaluateInterview:', err);
+    throw err;
+  }
+};
+
+
+export const evaluate = async (body: {
+  interviewId: string;
+  companyId: string;
+  userId: string;
+  responses: Record<string, {question: string;
+    answer: string; ideal_answer: string;}>;
+}) => {
+  try {
+    console.log('Evaluating interview with body:', body);
+    console.log('Interview ID:', body.interviewId);
+    console.log('Responses:', body.responses);
+    const payload = {
+      questions : body.responses,
+      userId: body.userId,
+      companyId: body.companyId,
+      interviewId: body.interviewId
     }
     console.log('Payload for evaluation:', payload);
     const res = await fetch('http://localhost:8000/evaluate', {
@@ -73,10 +116,11 @@ export const evaluateInterview = async (body: {
     });
 
     if (!res.ok) {
-      throw new Error(`Server responded with ${res.status}`);
-    }
+        throw new Error(`Server responded with ${res.status}`);
+      }
 
     const result = await res.json();
+    localStorage.setItem('evaluationResult', JSON.stringify(result));
     console.log('Evaluation Result:', result);
     return result;
   } catch (err) {

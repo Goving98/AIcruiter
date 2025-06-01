@@ -67,6 +67,23 @@ export default function QuestionsPage() {
     }
   }
 
+  const getComapnyId = () => {
+    const stored = localStorage.getItem('interviews');
+    if (stored) {
+      const interviews = JSON.parse(stored); // Array of interview objects
+      const interview = interviews.find((i: any) => i.id === interviewId);
+
+      if (interview) {
+        const companyId = interview.companyId;
+        console.log('CompanyId:', companyId);
+        return companyId || '';
+      } else {
+        console.warn('Interview not found for id:', interviewId);
+        return 'Interview not found.';
+      }
+    }
+  }
+
   /** Speak a line with WebSpeech synthesis. */
   const speak = (text: string): Promise<void> =>
     new Promise((resolve, reject) => {
@@ -110,7 +127,6 @@ export default function QuestionsPage() {
     setCallStatus(CallStatus.ACTIVE); // Set status to active when a step is being processed
 
     await speak(step.text); // Wait for the speech to finish
-
     if (step.type === 'question') {
       // begin listening for answer
       recognitionRef.current?.start();
@@ -119,7 +135,7 @@ export default function QuestionsPage() {
     } else if (step.type === 'closing') {
       toast.success('Interview completed!'); // notify user
       setCallStatus(CallStatus.FINISHED);
-      await submitForEvaluation(); // ★ send answers to BE
+      await submitForEvaluation(); //  send answers to BE
       router.push(`/interview/${interviewId}/result`); // navigate to results
     } else if (step.type === 'intro') {
       // After intro speaks, move to the next question
@@ -173,8 +189,7 @@ export default function QuestionsPage() {
 
 
     try {
-      console.log('Answers payload:', answersPayload);
-      
+      const companyId = await getComapnyId(); //To be used for real Interviews
       const eval_result = await evaluateInterview({
         interviewId: interviewId,
         responses: answersPayload,
@@ -291,12 +306,13 @@ export default function QuestionsPage() {
       const interview_description = getDescription();
       const interviewData = {
         resume : localStorage.getItem('resumeText') || '',
-        interview_id: interviewId,
+        interviewId: interviewId,
         interview_type: 'real', // or 'mock'
         candidate_skills: 'Python, Machine learning',
         job_description: interview_description || 'Software Engineer at XYZ Corp',
         project_details: 'Built various full-stack applications',
       };
+      console.log('Interview data:', interviewData);
       toast.success('Generating interview questions...');
       const data = await generateInterview(interviewData);
       setQuestions(data);

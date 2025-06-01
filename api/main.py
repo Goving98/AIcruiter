@@ -3,6 +3,7 @@ import os
 import re
 from typing import List, Optional
 
+import dotenv
 import together
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, Header, Request
@@ -10,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import MongoClient
 
+dotenv.load_dotenv()  # Load environment variables from .env file
 # from dotenv import load_dotenv
 
 app = FastAPI()
@@ -27,8 +29,9 @@ app.add_middleware(
 # app = FastAPI()
 load_dotenv()
 # API Key
-together.api_key = os.getenv("TOGETHER_API_KEY", None)  # Set your Together API key here
+together.api_key = os.getenv("TOGETHER_API_KEY", None)  # Set your Together API key her
 model_name = "mistralai/Mistral-7B-Instruct-v0.3"
+
 
 def extract_tech_qna(text):
     start = text.find('{')
@@ -327,10 +330,11 @@ You are an expert interviewer preparing a customized interview based on a given 
 
 
 @app.post("/evaluate")
-async def evaluate(
-    data: dict = Body(...)
-    ):
-    questions = data.get("questions", {})
+async def evaluate(input_params: dict = Body(...)):
+    questions = input_params.get("questions", {})
+    company_id = input_params.get("companyId", "")
+    student_id = input_params.get("userId", "")
+    interview_id = input_params.get("interviewId", "")
     tech_scores = []
     lang_scores = []
     behave_scores = []
@@ -395,7 +399,27 @@ async def evaluate(
 
     evaluations_collection.insert_one(record_data)  # Save to MongoDB
     return {
-        "interview_id"
+        "id" : interview_id,
+        "candidateName": '-',
+        "overallScore": final_avg,
+        "summmary": "-",
+        "sections": [
+            {
+                "title": "Technical",
+                "score": tech_avg,
+                "feedback": list(tech_overall_feedback)
+            },
+            {
+                "title": "Language",
+                "score": lang_avg,
+                "feedback": list(lang_overall_feedback)
+            },
+            {
+                "title": "Behavioral",
+                "score": behave_avg,
+                "feedback": list(behave_overall_feedback)
+            }
+        ],
         "final_score": final_avg,
         "technical_scores": tech_scores,
         "technical": tech_avg,
@@ -411,11 +435,9 @@ async def evaluate(
 
 
 @app.post("/mock-evaluate")
-async def mock_evaluate(
-    data: dict = Body(...)
-):
-    questions = data.get("questions", {})
-    print("questions", questions)
+async def mock_evaluate(input_params: dict = Body(...)):
+    questions = input_params.get("questions", {})
+    interview_id = input_params.get("interviewId", "")
     tech_scores = []
     lang_scores = []
     behave_scores = []
@@ -459,8 +481,27 @@ async def mock_evaluate(
     behave_overall_feedback = extract_overall_feedback(behavioral_feedback).replace('\n', ' ').strip()
     
     return {
-        "interview_id"
-        "final_score": final_avg,
+        "id" : interview_id,
+        "candidateName": '-',
+        "overallScore": final_avg,
+        "summmary": "-",
+        "sections": [
+            {
+                "title": "Technical",
+                "score": tech_avg,
+                "feedback": [tech_overall_feedback]
+            },
+            {
+                "title": "Language",
+                "score": lang_avg,
+                "feedback": [lang_overall_feedback]
+            },
+            {
+                "title": "Behavioral",
+                "score": behave_avg,
+                "feedback": [behave_overall_feedback]
+            }
+        ],
         "technical_scores": tech_scores,
         "technical": tech_avg,
         "technical_feedback": tech_overall_feedback,

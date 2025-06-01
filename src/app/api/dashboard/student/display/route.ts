@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
       status: doc.status || 'UPCOMING',
       createdAt: doc.createdAt,
       description: doc.description || '',
+      companyId : doc.companyId || '',
     }));
 
     return NextResponse.json(mapped);
