@@ -42,3 +42,12 @@ next-env.d.ts
 main.py
 
 api/main.py
+src/utils/mongodb.ts
+src\utils\mongodb.ts
+
+utils/mongodb.ts
+
+.env
+.env.local
+.env.development
+.env.production
