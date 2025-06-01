@@ -37,8 +37,25 @@ export async function GET(req: NextRequest) {
       .find({ _id: { $in: objectIds } })
       .toArray();
 
+    // Filter out expired interviews (end time has passed)
+    const now = new Date();
+    const validInterviews = interviews.filter((doc) => {
+      if (!doc.date || !doc.timeEnd) return true; // keep if missing info
+      const end = new Date(`${doc.date}T${doc.timeEnd}`);
+      return now <= end;
+    });
+
+    // Remove expired interview IDs from student's interviews array in DB
+    const validIds = validInterviews.map((doc) => doc._id.toString());
+    if (validIds.length !== interviewIds.length) {
+      await db.collection('student_details').updateOne(
+        { _id: new ObjectId(payload.userId) },
+        { $set: { interviews: validIds } }
+      );
+    }
+
     // Map _id to id for frontend and include title
-    const mapped = interviews.map((doc) => ({
+    const mapped = validInterviews.map((doc) => ({
       id: doc._id.toString(),
       date: doc.date,
       company: doc.company,
