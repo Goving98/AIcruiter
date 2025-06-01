@@ -7,7 +7,7 @@ import re
 from typing import List, Optional
 
 import together
-from fastapi import Body, FastAPI, Request
+from fastapi import Body, FastAPI, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -26,7 +26,7 @@ app.add_middleware(
 )
 # Initialize FastAPI app
 # app = FastAPI()
-
+load_dotenv()
 # API Key
 together.api_key = os.getenv("TOGETHER_API_KEY", None)  # Set your Together API key here
 model_name = "mistralai/Mistral-7B-Instruct-v0.3"
@@ -393,8 +393,9 @@ async def evaluate(
         "language_score": lang_avg,
         "language_feedback": lang_overall_feedback,
         "behavioral_score": behave_avg,
-        "behavioral_feedback": behave_overall_feedback
-    }
+        "behavioral_feedback": behave_overall_feedback,
+        "transcript":questions
+        }
 
     evaluations_collection.insert_one(record_data)  # Save to MongoDB
     return {
