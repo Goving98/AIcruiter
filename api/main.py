@@ -339,7 +339,7 @@ async def evaluate(
     lang_scores = []
     behave_scores = []
 
-    MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://student:joker123@aicruiter.vxv9q0t.mongodb.net/")
+    MONGO_URI = os.getenv("MONGO_URI", None)
     client = MongoClient(MONGO_URI)
     db = client["register_details"]  # Database name
     evaluations_collection = db["results"]  # Collection name
