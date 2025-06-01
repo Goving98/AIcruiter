@@ -18,7 +18,7 @@ interface SavedMessage {
 
 type ScriptEntry =
   | { type: 'intro' | 'closing'; text: string }
-  | { type: 'question'; text: string; id: string; userAnswer?: string };
+  | { type: 'question'; text: string; id: string; userAnswer?: string; ideal_answer?: string };
 
 enum CallStatus {
   INACTIVE = 'INACTIVE',
@@ -146,11 +146,15 @@ export default function QuestionsPage() {
   const submitForEvaluation = async () => {
     const answersPayload = scriptRef.current
       .filter((s): s is Extract<ScriptEntry, { type: 'question' }> => s.type === 'question')
-      .map(({ id, text, userAnswer }) => ({
-        id,
-        question: text,
-        answer: userAnswer ?? '',
-      }));
+      .reduce((acc, { id, text, userAnswer, ideal_answer }) => {
+        acc[id] = {
+          question: text,
+          answer: userAnswer ?? '',
+          ideal_answer: ideal_answer || '',
+        };
+        return acc;
+      }, {} as Record<string, { question: string; answer: string; ideal_answer: string }>);
+
 
     try {
       console.log('Submitting evaluation for interview:', interviewId);
@@ -264,50 +268,42 @@ export default function QuestionsPage() {
 
   /* Fetch questions once resume is uploaded & page loads */
   useEffect(() => {
-    const fetchQuestions = async () => {
-      handleStart() // Enter fullscreen mode when starting the interview
-      setIsLoading(true);
-      try {
-        const userSkills = localStorage.getItem('userSkills') || '';
-        const interviewData = {
-          candidate_skills: userSkills,
-          job_description: 'Software Developer position requiring strong programming skills',
-          project_details: 'Built various full-stack applications',
-        };
-        toast.success('Generating interview questions...');
-        const data = await generateInterview(interviewData);
+  const fetchQuestions = async () => {
+    handleStart(); // Enter fullscreen mode when starting the interview
+    setIsLoading(true);
+    try {
+      console.log('Fetching interview questions for ID:', interviewId);
+      console.log('Resume text:', localStorage.getItem('resumeText'));
+      // Simulate interview data
 
-        setQuestions(data);
-        buildScript(data); // create full script here
-      } catch (err) {
-        // Fallback data in case of API error
-        const data = {
-          "questions": {
-            "q1": {
-              "question": "What is a closure in JavaScript?",
-              "ideal_answer": "A closure is a function that has access to its own scope, the outer function’s scope, and the global scope."
-            },
-            "q2": {
-              "question": "Explain event delegation in JavaScript.",
-              "ideal_answer": "Event delegation is a technique where a single event listener is added to a parent element to manage events triggered by its children."
-            }
-          }
-        };
-        setQuestions(data);
-        buildScript(data);
-        console.error('Error fetching interview questions:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const resumeUploaded = localStorage.getItem('resumeUploaded');
-    if (!resumeUploaded) {
-      toast.error('Please upload your resume before starting the interview.');
-      router.push(`/interview/${interviewId}/upload`);
+      const interviewData = {
+        resume : localStorage.getItem('resumeText') || '',
+        interview_id: interviewId,
+        interview_type: 'real', // or 'mock'
+        candidate_skills: 'Python, Machine learning',
+        job_description: 'Software Developer position requiring strong programming skills',
+        project_details: 'Built various full-stack applications',
+      };
+      toast.success('Generating interview questions...');
+      const data = await generateInterview(interviewData);
+      setQuestions(data);
+      buildScript(data); // create full script here
+    } catch (err) {
+      toast.error('Failed to fetch interview questions. Please try again.');
+      console.error('Error fetching interview questions:', err);
+    } finally {
+      setIsLoading(false);
     }
-    else fetchQuestions();
-  }, [interviewId, router]);
+  };
+
+  const resumeUploaded = localStorage.getItem('resumeUploaded');
+  if (!resumeUploaded) {
+    toast.error('Please upload your resume before starting the interview.');
+    router.push(`/interview/${interviewId}/upload`);
+  } else {
+    fetchQuestions();
+  }
+}, [interviewId, router]);
 
   /* ===== UI handlers ===== */
 

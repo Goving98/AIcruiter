@@ -1,7 +1,9 @@
 interface InterviewData {
-  candidate_skills: string;
-  job_description: string;
-  project_details: string;
+  candidate_skills?: string;
+  job_description?: string;
+  project_details?: string;
+  resume: string;
+  interview_type: string; // 'mock' | 'real'
 }
 
 export const generateInterview = async (data: InterviewData) => {
@@ -19,13 +21,16 @@ export const generateInterview = async (data: InterviewData) => {
       const errorText = await response.text();
       throw new Error(`API Error ${response.status}: ${errorText}`);
     }
-    console.log('Response:', response.json);
-    return await response.json();
+
+    const result = await response.json();  // actually parse the JSON
+    console.log('Response:', result);      // log the actual result
+    return result;
   } catch (error) {
     console.error('API Error:', error);
     throw error;
   }
 };
+
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('token');

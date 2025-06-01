@@ -2,25 +2,75 @@
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
+
 export default function UploadPage() {
   const params = useParams();
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleStart = () => {
-    if (!file) {
-      alert('Please upload your resume first');
+    const uploaded = e.target.files?.[0];
+    if (!uploaded) {
+      setMessage('');
       return;
     }
-    // Store file in localStorage or state management
-    localStorage.setItem('resumeUploaded', 'true');
-    router.push(`/interview/${params.id}/questions`);
+
+    if (uploaded.type !== 'application/pdf') {
+      alert('Please upload a PDF file.');
+      setFile(null);
+      setMessage('Invalid file type. Please upload a PDF.');
+      return;
+    }
+
+    setFile(uploaded);
+    setMessage(`Selected: ${uploaded.name}`);
+  };
+
+  const handleStart = async () => {
+    if (!file) {
+      alert('Please upload your resume first.');
+      return;
+    }
+
+    if (!params?.id) {
+      alert('Interview ID is missing.');
+      return;
+    }
+
+    setIsProcessing(true);
+    setMessage('Uploading and processing resume...');
+
+    const formData = new FormData();
+    formData.append('resume', file);
+    try {
+      const response = await fetch('/api/extractpdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to extract text from PDF.');
+      }
+
+      const data = await response.json();
+
+      toast.success('Resume uploaded successfully!');
+      localStorage.setItem('resumeUploaded', 'true');
+      localStorage.setItem('resumeText', data.text);
+
+      router.push(`/interview/${params.id}/questions`);
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(`Error: ${error.message}`);
+      setMessage(`Error: ${error.message}`);
+      alert(`Failed to start interview: ${error.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -40,6 +90,7 @@ export default function UploadPage() {
             <button
               onClick={() => document.getElementById('resume')?.click()}
               className="bg-secondary-500 text-white px-6 py-3 rounded-lg hover:bg-secondary-400 transition-colors"
+              disabled={isProcessing}
             >
               Upload Resume (PDF)
             </button>
@@ -50,21 +101,21 @@ export default function UploadPage() {
               onChange={handleFileChange}
               className="hidden"
             />
-            {file && (
-              <p className="mt-2 text-green-400">
-                Uploaded: {file.name}
+            {message && (
+              <p className={`mt-2 ${message.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>
+                {message}
               </p>
             )}
           </div>
-          
+
           <button
             onClick={handleStart}
-            disabled={!file}
+            disabled={!file || isProcessing}
             className={`w-full bg-accent-500 text-white py-3 rounded-lg 
-              ${!file ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent-600'} 
+              ${(!file || isProcessing) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-accent-600'} 
               transition-colors`}
           >
-            Start Interview
+            {isProcessing ? 'Processing...' : 'Start Interview'}
           </button>
         </div>
       </div>
