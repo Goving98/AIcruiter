@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface InterviewCard {
+  id: number;
   date: string;
   company: string;
   role: string;
@@ -13,6 +14,7 @@ interface InterviewCard {
 
 const mockInterviews: InterviewCard[] = [
   {
+    id: 1,
     date: 'Sep 6',
     company: 'Some Name 1',
     role: 'Software Developer',
@@ -20,6 +22,7 @@ const mockInterviews: InterviewCard[] = [
     status: 'ACTIVE',
   },
   {
+    id: 2,
     date: 'Sep 18',
     company: 'Some Name 1',
     role: 'Software Developer',
@@ -27,6 +30,7 @@ const mockInterviews: InterviewCard[] = [
     status: 'UPCOMING',
   },
   {
+    id: 3,
     date: 'Sep 20',
     company: 'Some Name 1',
     role: 'Software Developer',
