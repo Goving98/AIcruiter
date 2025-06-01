@@ -6,6 +6,7 @@ import Image from 'next/image';
 // Example mock data with sections and feedback
 const mockResults = [
 	{
+		id:1,
 		date: 'Sep-6',
 		candidateName: 'John Doe',
 		company: 'Some Name 1',
@@ -30,6 +31,7 @@ const mockResults = [
 		],
 	},
 	{
+		id:2,
 		date: 'Sep-18',
 		candidateName: 'John Doe',
 		company: 'Some Name 1',
@@ -57,6 +59,7 @@ const mockResults = [
 		],
 	},
 	{
+		id:3,
 		date: 'Sep-20',
 		candidateName: 'John Doe',
 		company: 'Some Name 1',

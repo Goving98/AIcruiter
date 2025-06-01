@@ -49,15 +49,9 @@ export default function Layout({ children }: LayoutProps) {
               <>
                 <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/student/schedule')}
+                  onClick={() => router.push('/dashboard/student')}
                 >
                   Schedule
-                </button>
-                <button
-                  className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/student/applications')}
-                >
-                  Applications
                 </button>
                 <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
@@ -65,26 +59,39 @@ export default function Layout({ children }: LayoutProps) {
                 >
                   Results
                 </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/student/profile')}
+                >
+                  Profile
+                </button>
+                
               </>
             ) : userType === 'recruiter' ? (
               <>
                 <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company/interview')}
+                  onClick={() => router.push('/dashboard/company')}
                 >
-                  Interviews
+                  Home
                 </button>
                 <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
-                  onClick={() => router.push('/dashboard/company/applicants')}
+                  onClick={() => router.push('/dashboard/company/interviews')}
                 >
-                  Applicants
+                  Interviews
                 </button>
                 <button
                   className="font-medium text-gray-600 hover:text-indigo-600"
                   onClick={() => router.push('/dashboard/company/results')}
                 >
                   Results
+                </button>
+                <button
+                  className="font-medium text-gray-600 hover:text-indigo-600"
+                  onClick={() => router.push('/dashboard/company/profile')}
+                >
+                  Profile
                 </button>
               </>
             ) : null}
