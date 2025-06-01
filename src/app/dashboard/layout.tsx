@@ -40,14 +40,9 @@ export default function Layout({ children }: LayoutProps) {
               AI-cruiter
             </h1>
           </div>
-
-          {/* Center Nav Links */}
-          <div className="hidden md:flex space-x-8">
-            <button className="font-medium text-gray-600 hover:text-indigo-600">Schedule</button>
-            <button className="font-medium text-gray-600 hover:text-indigo-600">Applications</button>
-            <button className="font-medium text-gray-600 hover:text-indigo-600">Results</button>
-          </div>
-
+          
+          
+          
           {/* Right side: Logout */}
           <div>
             <LogoutButton />
