@@ -8,7 +8,7 @@ interface ResultCard {
   date: string;
   company: string;
   role: string;
-  createdAt?: string; // Optional field for created date
+  createdAt?: string;
 }
 
 export default function StudentResults() {
@@ -26,25 +26,25 @@ export default function StudentResults() {
       return;
     }
 
-    // Fetch results from API
+    const token = localStorage.getItem('token');
+
+    // Fetch results from API (GET)
     const fetchResults = async () => {
-  try {
-    const res = await fetch('/api/dashboard/company/route', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userType,
-        email: localStorage.getItem('email'), // send email explicitly
-        // ...other data
-      }),
-    });
-    if (!res.ok) throw new Error('Failed to fetch results');
-    const data = await res.json();
-    setResults(data);
-  } catch (err) {
-    toast.error('Failed to fetch results');
-  }
-};
+      try {
+        const res = await fetch('/api/dashboard/company/results', {
+          method: 'GET',
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch results');
+        const data = await res.json();
+        setResults(data);
+        console.log('Fetched results:', data);
+      } catch (err) {
+        toast.error('Failed to fetch results');
+      }
+    };
 
     fetchResults();
   }, [router]);
@@ -61,33 +61,31 @@ export default function StudentResults() {
 
   return (
     <div className="p-4 min-h-screen bg-gradient-to-br from-indigo-50 to-indigo-200">
-        <h1 className="text-2xl font-bold mb-6 text-black">Your Results</h1>
-        <div className="max-w-2xl mx-auto space-y-4">
+      <h1 className="text-2xl font-bold mb-6 text-black">Your Results</h1>
+      <div className="max-w-2xl mx-auto space-y-4">
         {sortedResults.map((result, index) => (
-            <div
+          <div
             key={index}
             className="group bg-white rounded-lg shadow-md p-6 flex flex-col md:flex-row md:items-center md:justify-between border border-indigo-100 transition cursor-pointer text-black
                 hover:bg-gradient-to-r hover:from-indigo-500 hover:to-purple-600 hover:text-white hover:shadow-xl"
             onClick={() => handleRowClick(result)}
-            >
+          >
             <div>
-                <div className="text-lg font-semibold group-hover:text-white">{result.company}</div>
-                <div className="text-sm text-gray-600 group-hover:text-white">{result.role}</div>
-                <div className="text-xs text-gray-400 mt-1 group-hover:text-white">Date: {result.date}</div>
+              <div className="text-lg font-semibold group-hover:text-white">{result.company}</div>
+              <div className="text-sm text-gray-600 group-hover:text-white">{result.role}</div>
+              <div className="text-xs text-gray-400 mt-1 group-hover:text-white">Date: {result.date}</div>
             </div>
-            </div>
+          </div>
         ))}
-        </div>
-        <div className="flex justify-center gap-4 pt-2">
-                    <button
-                        onClick={() =>
-                            router.push('/dashboard/company')
-                        }
-                        className="px-5 py-2 rounded bg-accent-500 hover:bg-accent-400 transition-all text-black"
-                    >
-                        Back to Dashboard
-                    </button>
-                </div>
+      </div>
+      <div className="flex justify-center gap-4 pt-2">
+        <button
+          onClick={() => router.push('/dashboard/company')}
+          className="px-5 py-2 rounded bg-accent-500 hover:bg-accent-400 transition-all text-black"
+        >
+          Back to Dashboard
+        </button>
+      </div>
     </div>
-    );
+  );
 }
