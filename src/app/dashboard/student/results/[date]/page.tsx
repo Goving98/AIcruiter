@@ -6,9 +6,10 @@ import Image from 'next/image';
 // Example mock data with sections and feedback
 const mockResults = [
 	{
-		id:1,
+		int_id:1,
 		date: 'Sep-6',
 		candidateName: 'John Doe',
+		userid: '12345',
 		company: 'Some Name 1',
 		role: 'Software Developer',
 		overallScore: 85,
@@ -31,9 +32,10 @@ const mockResults = [
 		],
 	},
 	{
-		id:2,
+		int_id:2,
 		date: 'Sep-18',
 		candidateName: 'John Doe',
+		userid: '12346',
 		company: 'Some Name 1',
 		role: 'Software Developer',
 		overallScore: 90,
@@ -59,9 +61,10 @@ const mockResults = [
 		],
 	},
 	{
-		id:3,
+		int_id:3,
 		date: 'Sep-20',
 		candidateName: 'John Doe',
+		userid: '12347',
 		company: 'Some Name 1',
 		role: 'Software Developer',
 		overallScore: 75,
