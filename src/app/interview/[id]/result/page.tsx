@@ -11,6 +11,7 @@ type SectionResult = {
 };
 
 type InterviewResults = {
+  id:number,
   candidateName: string;
   overallScore: number;      // 0-100
   summary: string;
@@ -33,6 +34,7 @@ export default function ResultsPage() {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setResults({
+        id:1,
         candidateName: 'Rick Astley',
         overallScore: 82,
         summary:
