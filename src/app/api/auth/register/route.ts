@@ -29,7 +29,11 @@ export async function POST(request: Request) {
             password: hashedPassword,
             userType,
             createdAt: new Date(),
+            ...(userType === 'recruitee' ? { interviews: [] } : {}),
+            ...(userType === 'recruitee' ? { feedbacks: [] } : {}) 
         };
+
+
 
 
         // Insert new user

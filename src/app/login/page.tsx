@@ -74,7 +74,7 @@ if (!userType) {
         priority
       />
       <div className="relative w-full max-w-md">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/50 to-purple-600/50 rounded-xl blur-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/60 to-purple-600/80 rounded-xl blur-xl"></div>
         <div className="relative bg-black/70 backdrop-blur-xl rounded-xl shadow-2xl p-8 border border-white/10">
           <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-center mb-8">
             Welcome Back
@@ -85,14 +85,14 @@ if (!userType) {
               className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
                 text-white rounded-xl transform hover:scale-[1.02] transition-all duration-200 shadow-xl"
             >
-              <span className="text-lg font-semibold">Login as Job Seeker</span>
+              <span className="text-lg font-medium text-amber-100">Login as Job Seeker</span>
             </button>
             <button
               onClick={() => setUserType('recruiter')}
               className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 
                 text-white rounded-xl transform hover:scale-[1.02] transition-all duration-200 shadow-xl"
             >
-              <span className="text-lg font-semibold">Login as Company</span>
+              <span className="text-lg font-semibold text-amber-100">Login as Company</span>
             </button>
           </div>
         </div>

@@ -1,7 +1,9 @@
 interface InterviewData {
-  candidate_skills: string;
-  job_description: string;
-  project_details: string;
+  candidate_skills?: string;
+  job_description?: string;
+  project_details?: string;
+  resume: string;
+  interview_type: string; // 'mock' | 'real'
 }
 
 export const generateInterview = async (data: InterviewData) => {

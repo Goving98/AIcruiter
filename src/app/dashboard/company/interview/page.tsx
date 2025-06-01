@@ -15,6 +15,7 @@ export default function CreateInterview() {
     timeStart: '',
     timeEnd: '',
     description: '',
+    candidateEmails: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -26,18 +27,43 @@ export default function CreateInterview() {
 
     const requiredFields = ['title', 'role', 'technologies', 'date', 'timeStart', 'timeEnd', 'description'];
     const hasEmpty = requiredFields.some((key) => !form[key as keyof typeof form]);
-    console.log('Form submitted:', form);
-    console.log('Has empty fields:', hasEmpty);
     if (hasEmpty) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
-      // Simulate submission or send to API
-      console.log('Submitting interview:', form);
+      // Get company email from localStorage
+      const userDataStr = localStorage.getItem('userData');
+      let companyEmail = '';
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          companyEmail = userData.email || '';
+        } catch {}
+      }
+
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('/api/interview/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          ...form,
+          companyEmail,
+          candidateEmails: form.candidateEmails
+            .split(',')
+            .map(email => email.trim())
+            .filter(email => email.length > 0),
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to create interview');
       toast.success('Interview created successfully!');
-      router.push('/dashboard/company'); // Change path as needed
+      router.push('/dashboard/company');
     } catch (err) {
       toast.error('Failed to create interview');
     }
@@ -124,6 +150,40 @@ export default function CreateInterview() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Email List */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700">Candidate Emails (comma-separated)</label>
+          <input
+            type="text"
+            name="candidateEmails"
+            placeholder="e.g. user1@example.com, user2@example.com"
+            value={form.candidateEmails}
+            onChange={handleChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+          />
+          {/* Preview top 5 emails */}
+          {form.candidateEmails && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {form.candidateEmails
+                .split(',')
+                .map(email => email.trim())
+                .filter(email => email.length > 0)
+                .slice(0, 5)
+                .map((email, i) => (
+                  <span
+                    key={i}
+                    className="bg-indigo-100 text-indigo-700 text-sm px-2 py-1 rounded-full"
+                  >
+                    {email}
+                  </span>
+                ))}
+              {form.candidateEmails.split(',').length > 5 && (
+                <span className="text-sm text-gray-500">+ more</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div>
