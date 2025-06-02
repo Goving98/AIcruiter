@@ -8,7 +8,7 @@ const team = [
   { name: 'Arvind Agarwal' },
   { name: 'Ankur Banerjee' },
   { name: 'Govind Daliya' },
-  { name: 'Raghuveer Oja' },
+  { name: 'Raghuveer Oza' },
 ];
 
 export default function AboutUs() {

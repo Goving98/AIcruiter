@@ -1,6 +1,6 @@
 'use client';
 
-import { evaluateInterview, generateInterview } from '@/utils/api';
+import { evaluate, generateInterview } from '@/utils/api';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -190,9 +190,11 @@ export default function QuestionsPage() {
 
     try {
       const companyId = await getComapnyId(); //To be used for real Interviews
-      const eval_result = await evaluateInterview({
+      const eval_result = await evaluate({
         interviewId: interviewId,
         responses: answersPayload,
+        companyId: companyId,
+        userId: localStorage.getItem('userId') || '',
       });
       localStorage.setItem('evaluationResult', JSON.stringify(eval_result));
       console.log('Evaluation submitted.');
