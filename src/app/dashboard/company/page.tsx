@@ -2,16 +2,61 @@
 
 import { Calendar, FileText, PlusCircle, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
+import toast from 'react-hot-toast';
+
+interface DashboardStats {
+  interviewsScheduled: number;
+  totalApplicants: number;
+  pendingReviews: number;
+}
+
 
 export default function CompanyDashboard() {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [stats, setStats] = useState<DashboardStats>({
+    interviewsScheduled: 0,
+    totalApplicants: 0,
+    pendingReviews: 0
+  });
 
-  const stats = [
-    { label: 'Interviews Scheduled', value: 12, icon: Calendar },
-    { label: 'Total Applicants', value: 45, icon: Users },
-    { label: 'Pending Reviews', value: 8, icon: FileText },
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error('Please login to continue');
+          router.push('/login');
+          return;
+        }
+
+        const response = await fetch('/api/dashboard/company  ', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch stats');
+        }
+
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        toast.error('Failed to load dashboard stats');
+      }
+    };
+
+    fetchStats();
+  }, [router]);
+
+
+  const statsConfig = [
+    { label: 'Interviews Scheduled', value: stats.interviewsScheduled, icon: Calendar },
+    { label: 'Total Applicants', value: stats.totalApplicants, icon: Users },
+    { label: 'Pending Reviews', value: stats.pendingReviews, icon: FileText },
   ];
 
   return (
@@ -25,7 +70,7 @@ export default function CompanyDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
-          {stats.map((stat, idx) => (
+          {statsConfig.map((stat, idx) => (
             <div key={idx} className=" border-indigo-600 border-1 rounded-xl shadow-2xl p-6 flex items-center space-x-4 hover:shadow-lg transition-shadow">
               <stat.icon className="text-indigo-600 w-8 h-8" />
               <div>

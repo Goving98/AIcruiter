@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
         '/api/dashboard/student/display', 
         '/api/dashboard/student/results', 
         '/api/dashboard/company/attempts',
+        '/api/dashboard/company',
     ];
     if (publicPaths.includes(request.nextUrl.pathname)) {
         return NextResponse.next();
