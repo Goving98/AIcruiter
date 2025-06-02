@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/utils/mongodb';
 import { verifyToken } from '@/utils/jwt';
+import { connectToDatabase } from '@/utils/mongodb';
 import { ObjectId } from 'mongodb';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
@@ -66,6 +66,8 @@ export async function GET(req: NextRequest) {
       timeEnd: doc.timeEnd,
       status: doc.status || 'UPCOMING',
       createdAt: doc.createdAt,
+      description: doc.description || '',
+      companyId : doc.companyId || '',
     }));
 
     return NextResponse.json(mapped);

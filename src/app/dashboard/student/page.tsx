@@ -40,6 +40,7 @@ export default function StudentDashboard() {
         });
         if (!res.ok) throw new Error('Failed to fetch interviews');
         const data = await res.json();
+        localStorage.setItem('interviews', JSON.stringify(data));
 
         const now = new Date();
         const mapped = data.map((interview: any) => {
@@ -76,12 +77,31 @@ export default function StudentDashboard() {
       toast.error('This interview is not active');
       return;
     }
-    router.push(`/interview/${interview.date.replace(/\s/g, '-')}/upload`);
+    router.push(`/interview/${interview.id.replace(/\s/g, '-')}/upload`);
   };
 
   return (
     <div className="min-h-screen bg-center">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {interviews.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 text-center shadow-xl border border-white/20">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
+                No Interviews Scheduled
+              </h2>
+              <p className="text-gray-600">
+                You currently don't have any interviews scheduled. Check back later for updates.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+              Your Scheduled Interviews
+            </h1>
+            <p className="text-gray-600 mt-2">Click on an interview card to view details</p>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {interviews.map((interview, index) => (
             <button

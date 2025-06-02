@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/utils/mongodb';
 import { verifyToken } from '@/utils/jwt';
+import { connectToDatabase } from '@/utils/mongodb';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     if (interview.candidateEmails.length > 0) {
       await db.collection('student_details').updateMany(
         { email: { $in: interview.candidateEmails } },
-        { $push: { interviews: result.insertedId.toString() } }
+        { $push: { interviews: result.insertedId.toString() } } as any
       );
     }
 

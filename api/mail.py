@@ -5,8 +5,13 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import dotenv
+
+# Load environment variables from .env file
+dotenv.load_dotenv()
+
 # Interview data
-data = {
+sample_data = {
    "candidateName": "Rick Astley",
    "overallScore": 82,
    "summary": "Great technical proficiency and strong problem-solving skills. Improve on articulating design trade-offs and clarify edge-case handling.",
@@ -47,7 +52,6 @@ def build_html_body(data):
     <html>
       <body style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #4CAF50;">AI-Cruiter Interview Feedback</h2>
-        <p><strong>Candidate:</strong> {data['candidateName']}</p>
         <p><strong>Overall Score:</strong> {data['overallScore']}/100</p>
         <p><strong>Summary:</strong> {data['summary']}</p>
         <h3>🔍 Section-wise Breakdown:</h3>
@@ -95,18 +99,25 @@ def message(subject="Interview Feedback", html_text="", img=None, attachment=Non
 
     return msg
 
-# Email setup
-smtp = smtplib.SMTP('smtp.gmail.com', 587)
-smtp.ehlo()
-smtp.starttls()
-email = os.environ.get('EMAIL_USER','')
-password = os.environ.get('EMAIL_PASS','')
-smtp.login(email, password)
 
-# Generate HTML body and send
-html_body = build_html_body(data)
-msg = message(subject=f"AI-cruiter Interview Feedback: {data['candidateName']}", html_text=html_body)
+def build_email(feedback_data, user_email="arvindagarwal839@gmail.com"):
+    """
+    Build an email message with the given subject, HTML text, images, and attachments.
+    """
+    # Email setup
+    smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    smtp.ehlo()
+    smtp.starttls()
+    email = os.environ.get('EMAIL_USER','')
+    password = os.environ.get('EMAIL_PASS','')
+    smtp.login(email, password)
 
-to = ["arvindagarwal839@gmail.com"]
-smtp.sendmail(from_addr="Aicruiter@gmail.com", to_addrs=to, msg=msg.as_string())
-smtp.quit()
+    # Generate HTML body and send
+    html_body = build_html_body(feedback_data)
+    msg = message(subject=f"AI-cruiter Interview Feedback: {feedback_data['candidateName']}", html_text=html_body)
+
+    to = [user_email]
+    smtp.sendmail(from_addr="Aicruiter@gmail.com", to_addrs=to, msg=msg.as_string())
+    smtp.quit()
+
+    return True

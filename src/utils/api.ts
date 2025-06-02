@@ -7,8 +7,11 @@ interface InterviewData {
 }
 
 export const generateInterview = async (data: InterviewData) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+  console.log('Generating interview with data:', data);
+  console.log('Backend URL:', BE_URL);
   try {
-    const response = await fetch('http://localhost:8000/generate-interview/', {
+    const response = await fetch(`${BE_URL}/generate-interview/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,27 +59,75 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const evaluateInterview = async (body: {
   interviewId: string;
-  responses: {
-    questionId: string;
-    question: string;
-    ideal_answer: string;
-    userAnswer?: string;
-  }[];
+  responses: Record<string, {question: string;
+    answer: string; ideal_answer: string;}>;
 }) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
   try {
-    const res = await fetch('/api/evaluateInterview', {
+    const payload = {
+      interviewId: body.interviewId,
+      questions : body.responses,
+      userEmail: localStorage.getItem('userEmail') || '',
+    }
+    console.log('Payload for evaluation:', payload);
+    const res = await fetch(`${BE_URL}/mock-evaluate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
+    });
+
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Server responded with ${res.status}: ${errorText}`);
+    }
+    const result = await res.json();
+    localStorage.setItem('evaluationResult', JSON.stringify(result));
+    console.log('Evaluation Result:', result);
+    return result;
+  } catch (err) {
+    console.error('Error in evaluateInterview:', err);
+    throw err;
+  }
+};
+
+
+export const evaluate = async (body: {
+  interviewId: string;
+  companyId: string;
+  userId: string;
+  responses: Record<string, {question: string;
+    answer: string; ideal_answer: string;}>;
+}) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+  try {
+    console.log('Evaluating interview with body:', body);
+    console.log('Interview ID:', body.interviewId);
+    console.log('Responses:', body.responses);
+    const payload = {
+      questions : body.responses,
+      userId: body.userId,
+      companyId: body.companyId,
+      interviewId: body.interviewId
+    }
+    console.log('Payload for evaluation:', payload);
+    const res = await fetch(`${BE_URL}/evaluate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
-      throw new Error(`Server responded with ${res.status}`);
-    }
+        throw new Error(`Server responded with ${res.status}`);
+      }
 
     const result = await res.json();
+    localStorage.setItem('evaluationResult', JSON.stringify(result));
+    console.log('Evaluation Result:', result);
     return result;
   } catch (err) {
     console.error('Error in evaluateInterview:', err);
