@@ -8,6 +8,7 @@ import together
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
+from mail import build_email
 from pydantic import BaseModel
 from pymongo import MongoClient
 
@@ -402,7 +403,7 @@ async def evaluate(input_params: dict = Body(...)):
         "id" : interview_id,
         "candidateName": '-',
         "overallScore": final_avg,
-        "summmary": "-",
+        "summary": "",
         "sections": [
             {
                 "title": "Technical",
@@ -438,6 +439,7 @@ async def evaluate(input_params: dict = Body(...)):
 async def mock_evaluate(input_params: dict = Body(...)):
     questions = input_params.get("questions", {})
     interview_id = input_params.get("interviewId", "")
+    user_email = input_params.get("userEmail", "")
     tech_scores = []
     lang_scores = []
     behave_scores = []
@@ -480,11 +482,12 @@ async def mock_evaluate(input_params: dict = Body(...)):
     lang_overall_feedback = extract_overall_feedback(language_feedback).replace('\n', ' ').strip()
     behave_overall_feedback = extract_overall_feedback(behavioral_feedback).replace('\n', ' ').strip()
     
-    return {
+    
+    interview_feedaback = {
         "id" : interview_id,
-        "candidateName": '-',
+        "candidateName": '',
         "overallScore": final_avg,
-        "summmary": "-",
+        "summary": "",
         "sections": [
             {
                 "title": "Technical",
@@ -500,6 +503,43 @@ async def mock_evaluate(input_params: dict = Body(...)):
                 "title": "Behavioral",
                 "score": behave_avg,
                 "feedback": [behave_overall_feedback]
+            }
+        ],
+        "technical_scores": tech_scores,
+        "technical": tech_avg,
+        "technical_feedback": tech_overall_feedback,
+        "language_scores": lang_scores,
+        "language": lang_avg,
+        "language_feedback": lang_overall_feedback,
+        "behavioral_scores": behave_scores,
+        "behavioral": behave_avg,
+        "behavioral_feedback": behave_overall_feedback,
+    }
+    try:
+        build_email(feedback_data=interview_feedaback, user_email=user_email)
+    except Exception as e:
+        print(f"Error sending email: {e}")
+    
+    return {
+        "id" : interview_id,
+        "candidateName": '-',
+        "overallScore": final_avg,
+        "summary": "",
+        "sections": [
+            {
+                "title": "Technical",
+                "score": tech_avg,
+                "feedback": [tech_overall_feedback[:500]+ "..."]  # Truncate feedback for display
+            },
+            {
+                "title": "Language",
+                "score": lang_avg,
+                "feedback": [lang_overall_feedback[:500]+ "..."]
+            },
+            {
+                "title": "Behavioral",
+                "score": behave_avg,
+                "feedback": [behave_overall_feedback[:500]+ "..."]
             }
         ],
         "technical_scores": tech_scores,

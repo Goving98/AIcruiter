@@ -43,7 +43,7 @@ export default function QuestionsPage() {
   const [questions, setQuestions] = useState<QuestionsResponse>({ questions: {} });
   const scriptRef = useRef<ScriptEntry[]>([]); // ★ master script (Q + A)
   const idx = useRef(0); // ★ pointer to current script entry
-  const shouldListen = useRef(true); // ★ whether to listen for answers
+  const shouldListen = useRef(true); // whether to listen for answers
 
   /* ----- speech recognition refs ----- */
   const transcriptRef = useRef('');

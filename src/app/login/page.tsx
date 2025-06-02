@@ -54,6 +54,7 @@ export default function Login() {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('userType', userType as string);
         localStorage.setItem('userData', JSON.stringify(data.user));
+        localStorage.setItem('userEmail', data.user.email);
 
         toast.success('Login successful!');
         router.push(userType === 'recruitee' ? '/dashboard/student' : '/dashboard/company');

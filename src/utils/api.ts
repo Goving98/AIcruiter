@@ -7,8 +7,11 @@ interface InterviewData {
 }
 
 export const generateInterview = async (data: InterviewData) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
+  console.log('Generating interview with data:', data);
+  console.log('Backend URL:', BE_URL);
   try {
-    const response = await fetch('http://localhost:8000/generate-interview/', {
+    const response = await fetch(`${BE_URL}/generate-interview/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,13 +62,15 @@ export const evaluateInterview = async (body: {
   responses: Record<string, {question: string;
     answer: string; ideal_answer: string;}>;
 }) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
   try {
     const payload = {
       interviewId: body.interviewId,
-      questions : body.responses
+      questions : body.responses,
+      userEmail: localStorage.getItem('userEmail') || '',
     }
     console.log('Payload for evaluation:', payload);
-    const res = await fetch('http://localhost:8000/mock-evaluate', {
+    const res = await fetch(`${BE_URL}/mock-evaluate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -96,6 +101,7 @@ export const evaluate = async (body: {
   responses: Record<string, {question: string;
     answer: string; ideal_answer: string;}>;
 }) => {
+  const BE_URL = process.env.NEXT_PUBLIC_BE_URL;
   try {
     console.log('Evaluating interview with body:', body);
     console.log('Interview ID:', body.interviewId);
@@ -107,7 +113,7 @@ export const evaluate = async (body: {
       interviewId: body.interviewId
     }
     console.log('Payload for evaluation:', payload);
-    const res = await fetch('http://localhost:8000/evaluate', {
+    const res = await fetch(`${BE_URL}/evaluate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
