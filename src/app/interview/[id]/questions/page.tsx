@@ -270,10 +270,7 @@ export default function QuestionsPage() {
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (
-        !document.fullscreenElement &&
-        !document.webkitFullscreenElement &&
-        !document.mozFullScreenElement &&
-        !document.msFullscreenElement
+        !document.fullscreenElement
       ) {
         // User exited fullscreen
         toast.error('You cannot exit fullscreen during the interview.');
